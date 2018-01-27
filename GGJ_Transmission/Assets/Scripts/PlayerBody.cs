@@ -8,5 +8,5 @@ public class PlayerBody : MonoBehaviour {
     [SerializeField] public float m_speedMod;
     [SerializeField] public float m_soulOffset_y;
     [SerializeField] public float m_maxSpeed;
-    [SerializeField] public GameObject bluelight;
+    [SerializeField] public float m_possessDelay;
 }

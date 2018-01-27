@@ -8,7 +8,7 @@ public class PlayerMind : MonoBehaviour
     [SerializeField] PlayerBody bodyinfo;
     [SerializeField] GameObject soul;
     [SerializeField] bool possessed;
-
+    float freezeTimer;
     bool jumpQueued;
     float jumpTimer;
 
@@ -23,8 +23,8 @@ public class PlayerMind : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Center on dat bot!
-        gameObject.transform.position = target.gameObject.transform.position;
+        //Center on dat bot! and LERP!
+        gameObject.transform.position = Vector2.Lerp(gameObject.transform.position, target.gameObject.transform.position, Time.deltaTime*4);
 
         //Get dat inputs!
         float hAxis = Input.GetAxis("Horizontal");
@@ -107,6 +107,23 @@ public class PlayerMind : MonoBehaviour
                 soul.SetActive(false);
             }
 
+            if (Input.GetButtonDown("Transmit"))
+            {
+                print("Preping to transmit...");
+                GameObject temp;
+                RaycastHit2D hit;
+                if (hit = Physics2D.Raycast(soul.transform.position, new Vector2(0, 0), 0))
+                {
+                    if (hit.collider.gameObject.tag == "Player")
+                    {
+                        print("Transmitting...");
+                        target = hit.collider.gameObject.GetComponent<Rigidbody2D>();
+                        bodyinfo = hit.collider.gameObject.GetComponent<PlayerBody>();
+                        possessed = true;
+                        soul.SetActive(false);
+                    }
+                }
+            }
             Vector2 vel = new Vector2(hAxis, vAxis);
             vel *= Time.fixedDeltaTime * 5.0f;
             soul.transform.Translate(vel);

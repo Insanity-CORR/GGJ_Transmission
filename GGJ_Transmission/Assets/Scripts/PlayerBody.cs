@@ -7,4 +7,6 @@ public class PlayerBody : MonoBehaviour {
     [SerializeField] public float m_jumpStrength;
     [SerializeField] public float m_speedMod;
     [SerializeField] public float m_soulOffset_y;
+    [SerializeField] public float m_maxSpeed;
+    [SerializeField] public GameObject bluelight;
 }

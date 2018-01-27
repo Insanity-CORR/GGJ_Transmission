@@ -32,9 +32,9 @@ public class PlayerMind : MonoBehaviour
         bool jumpBtn = Input.GetButtonDown("Jump");
 
 
+        bodyinfo.GetComponentInChildren<Animator>().SetBool("Deactivated", !possessed);
         if (possessed) //If you are controlling a bot...
         {
-
             //Keep the soul centered
             Vector2 temp = new Vector2(transform.position.x, transform.position.y + bodyinfo.m_soulOffset_y);
             soul.transform.position = temp;
@@ -80,6 +80,22 @@ public class PlayerMind : MonoBehaviour
             }
 
             target.AddForce(appliedForce);
+            {
+
+                Vector2 t = new Vector2(target.velocity.x, 0);
+                target.GetComponentInChildren<Animator>().SetBool("Walking", t.magnitude > 0);
+                if (t.x > 0)
+                    target.GetComponentInChildren<SpriteRenderer>().flipX = false;
+                if (t.x < 0)
+                    target.GetComponentInChildren<SpriteRenderer>().flipX = true;
+                if (t.magnitude > bodyinfo.m_maxSpeed)
+                {
+                    t.Normalize();
+                    t *= bodyinfo.m_maxSpeed;
+                    t.y = target.velocity.y;
+                    target.velocity = t;
+                }
+            }
         }
         else
         {

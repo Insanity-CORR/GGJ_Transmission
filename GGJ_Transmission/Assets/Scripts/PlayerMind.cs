@@ -12,17 +12,37 @@ public class PlayerMind : MonoBehaviour
     bool jumpQueued;
     float jumpTimer;
 
+    bool isElevator;
+
+    bool jumping, falling, action;
+
     // Use this for initialization
     void Start()
     {
         jumpQueued = false;
         jumpTimer = 0.0f;
+        isElevator = true;
+        freezeTimer = 0;
 
+        jumping = false;
+        falling = false;
+        action  = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        bodyinfo.GetComponentInChildren<Animator>().SetBool("Deactivated", !possessed);
+        bodyinfo.GetComponentInChildren<Animator>().SetBool("Jumping", jumping);
+        bodyinfo.GetComponentInChildren<Animator>().SetBool("Falling", falling);
+
+        if (freezeTimer > 0)
+        {
+            freezeTimer -= Time.deltaTime;
+            return;
+        }
+
         //Center on dat bot! and LERP!
         gameObject.transform.position = Vector2.Lerp(gameObject.transform.position, target.gameObject.transform.position, Time.deltaTime*4);
 
@@ -32,9 +52,9 @@ public class PlayerMind : MonoBehaviour
         bool jumpBtn = Input.GetButtonDown("Jump");
 
 
-        bodyinfo.GetComponentInChildren<Animator>().SetBool("Deactivated", !possessed);
         if (possessed) //If you are controlling a bot...
         {
+
             //Keep the soul centered
             Vector2 temp = new Vector2(transform.position.x, transform.position.y + bodyinfo.m_soulOffset_y);
             soul.transform.position = temp;
@@ -51,7 +71,11 @@ public class PlayerMind : MonoBehaviour
             sidetest2.x += 0.35f;
             if (Physics2D.Raycast(gameObject.transform.position, new Vector2(0, -1f), 0.05f) || Physics2D.Raycast(sidetest2, new Vector2(0, -1f), 0.05f) || Physics2D.Raycast(sidetest1, new Vector2(0, -1f), 0.05f))
             {
-
+                if (falling || jumping)
+                {
+                    falling = false;
+                    jumping = false;
+                }
                 if (Input.GetButtonDown("Transmit"))
                 {
                     possessed = false;
@@ -67,6 +91,7 @@ public class PlayerMind : MonoBehaviour
                 {
                     jumpQueued = true;
                     jumpTimer = bodyinfo.m_jumpDelay;
+                    jumping = true;
                 }
             }
             else
@@ -96,6 +121,11 @@ public class PlayerMind : MonoBehaviour
                     target.velocity = t;
                 }
             }
+            if (jumping && target.velocity.y < 0)
+            {
+                jumping = false;
+                falling = true;
+            }
         }
         else
         {
@@ -109,18 +139,16 @@ public class PlayerMind : MonoBehaviour
 
             if (Input.GetButtonDown("Transmit"))
             {
-                print("Preping to transmit...");
-                GameObject temp;
                 RaycastHit2D hit;
                 if (hit = Physics2D.Raycast(soul.transform.position, new Vector2(0, 0), 0))
                 {
                     if (hit.collider.gameObject.tag == "Player")
                     {
-                        print("Transmitting...");
                         target = hit.collider.gameObject.GetComponent<Rigidbody2D>();
                         bodyinfo = hit.collider.gameObject.GetComponent<PlayerBody>();
                         possessed = true;
                         soul.SetActive(false);
+                        freezeTimer = bodyinfo.m_possessDelay;
                     }
                 }
             }
